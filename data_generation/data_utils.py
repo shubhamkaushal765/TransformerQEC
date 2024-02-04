@@ -23,24 +23,25 @@ def encode_hex(bits, distance=None, type="bits"):
     return result
 
 
-def decode_hex(hex_bits, distance):
+def decode_hex(hex_bits, distance, sep=""):
     """
     Decode a hexadecimal string into a binary bit sequence.
 
     Parameters:
     - hex_bits (str): The input hexadecimal string to be decoded.
     - distance (int): The number of bits in each chunk for conversion.
+    - sep (str): This is used to join the int string
 
     Returns:
     str: A binary bit sequence representing the decoded hexadecimal string.
 
     Example:
-    >>> decode_hex('1ad2a', distance=4)
+    >>> decode_hex('1ad2a', distance=4. sep="")
     '110110101010'
     """
     bits = hex_bits.split("x")
     bits = filter(lambda x: x, bits)
     bit_int = map(lambda x: int(x, 16), bits)
     bit_bit = list(map(lambda x: format(x, f"0{distance}b"), bit_int))
-    bit_bit = "".join(bit_bit)
+    bit_bit = sep.join(bit_bit)
     return bit_bit
