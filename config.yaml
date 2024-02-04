@@ -1,0 +1,5 @@
+# data
+DISTANCE: 5
+SHOTS: 2000
+DATASET_DIR: "datasets"
+ENCODING_CHANNEL: 6
