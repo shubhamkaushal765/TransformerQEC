@@ -27,9 +27,9 @@ class LightningTransformer(L.LightningModule):
         w_acc, f1 = self.weighted_acc(y_pred, y)
 
         # logging metrics
-        self.log(f'{mode}_WAcc', w_acc, on_epoch=True)
-        self.log(f'{mode}_F1', f1, on_epoch=True)
-        self.log(f'{mode}_Loss', loss, on_epoch=True)
+        self.log(f'{mode}_WAcc', w_acc, on_epoch=True, on_step=False)
+        self.log(f'{mode}_F1', f1, on_epoch=True, on_step=False)
+        self.log(f'{mode}_Loss', loss, on_epoch=True, on_step=False)
         
         return loss
 
