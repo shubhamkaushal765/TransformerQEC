@@ -5,4 +5,4 @@ DATASET_DIR: "datasets"
 ENCODING_CHANNEL: 6
 
 # Training Device
-DEVICE: "mps"
+DEVICE: "cpu"

@@ -3,7 +3,7 @@ import yaml, os
 from torch.utils.data import DataLoader, random_split
 import lightning as L
 from lightning.pytorch import seed_everything
-from lightning.pytorch.callbacks.early_stopping import EarlyStopping
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger
 from data import QuantumSyndromeDataset
 from lightning_module import LightningTransformer
@@ -30,7 +30,7 @@ dataset = QuantumSyndromeDataset(datafile)
 train_size = len(dataset) // 2
 val_size = len(dataset) // 4
 test_size = len(dataset) - train_size - val_size
-train_ds, val_ds, test_ds = random_split(dataset, (train_size, val_size, test_size))
+train_ds, val_ds, test_ds = random_split(dataset, (64, 64, len(dataset)-128))
 train_dl = DataLoader(train_ds, batch_size=32, shuffle=True)
 val_dl = DataLoader(val_ds, batch_size=32, shuffle=True)
 test_dl = DataLoader(test_ds, batch_size=32, shuffle=True)
@@ -38,7 +38,8 @@ test_dl = DataLoader(test_ds, batch_size=32, shuffle=True)
 
 # LIGHTNING CODE
 # callbacks
-early_stopping = EarlyStopping(monitor="val_loss", mode="min", patience=5)
+early_stopping = EarlyStopping(monitor="valid_Loss", mode="min", patience=5)
+model_checkpoint = ModelCheckpoint(dirpath="chcekpoints", monitor="valid_Loss", mode="min", save_top_k=3)
 
 # loggers
 logger = CSVLogger(save_dir="logs", name="TransformerQEC", flush_logs_every_n_steps=100)
@@ -51,6 +52,6 @@ trainer = L.Trainer(
     check_val_every_n_epoch=5,
     max_epochs=100,
     min_epochs=10,
-    callbacks=[early_stopping]
+    callbacks=[early_stopping, model_checkpoint]
     )
 trainer.fit(model=model, train_dataloaders=train_dl, val_dataloaders=val_dl)

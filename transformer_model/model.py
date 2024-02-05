@@ -32,113 +32,13 @@ https://pypi.org/project/positional-encodings/
 
 import torch, yaml
 import torch.nn as nn
-import torch.nn.functional as F
 
 from positional_encodings.torch_encodings import PositionalEncoding2D
+from .encoders import transformer_encoder_model, TransformerBlock
 
 with open("config.yaml", 'r') as file:
     data = yaml.safe_load(file)
 DEVICE = data['DEVICE']
-
-
-class MultiSelfAttention(nn.Module):
-    def __init__(self, embeddings=256, heads=8, mask=False):
-        super().__init__()
-
-        assert embeddings % heads == 0, f"Embeddings:{embeddings} and heads:{heads} doesn't fit the architecture."
-
-        self.embeddings = embeddings
-        self.heads = heads
-        self.mask = mask
-        
-        self.tokey = nn.Linear(embeddings, embeddings, bias=False)
-        self.toquery = nn.Linear(embeddings, embeddings, bias=False)
-        self.tovalue = nn.Linear(embeddings, embeddings, bias=False)
-
-        self.output_head = nn.Linear(embeddings, embeddings)
-
-
-    def forward(self, x):
-        """
-        x is of shape (batch, seq, embedding)
-        """
-
-        # checking the embedding dimension
-        b, seq, emb = x.shape
-        assert self.embeddings == emb, f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
-        
-        keys = self.tokey(x)
-        queries = self.toquery(x)
-        values = self.tovalue(x)
-
-        # these values can now be cut into (# of head) chunks.
-        # each chunk will go to seperate SelfAttention.
-        # At the end, all chunks will be concatenated to get back the dimensions in the embeddings.
-        heads = self.heads
-        emb_chunks = emb // heads
-        keys = keys.view(b, seq, heads, emb_chunks)
-        queries = queries.view(b, seq, heads, emb_chunks)
-        values = values.view(b, seq, heads, emb_chunks)
-
-        # fold the heads into the batch dimension
-        keys = keys.transpose(1, 2).contiguous().view(b * heads, seq, emb_chunks)
-        queries = queries.transpose(1, 2).contiguous().view(b * heads, seq, emb_chunks)
-        values = values.transpose(1, 2).contiguous().view(b * heads, seq, emb_chunks)
-
-        # self-attention, scaling, masking and normalization
-        # the output shape is (b * heads, seq, seq)
-        attn_weights = torch.bmm(queries, keys.transpose(1, 2))
-        attn_weights = attn_weights / (emb ** 0.5)
-        if self.mask:
-            indices = torch.triu_indices(seq, seq, offset=1)
-            attn_weights[:, indices[0], indices[2]] = float("-inf")
-        attn_weights = F.softmax(attn_weights, dim=2)
-
-        # applying self-attention to values
-        output = torch.bmm(attn_weights, values).view(b, heads, seq, emb_chunks)
-
-        # re-arrange the output to match the input x, and send it through final FFN
-        output = output.transpose(1, 2).contiguous().view(b, seq, emb)
-        output = self.output_head(output)
-
-        return output
-
-
-class TransformerBlock(nn.Module):
-    def __init__(self, embeddings=256, heads=8, ff_dimension=512, mask=False):
-
-        super().__init__()
-
-        self.embeddings = embeddings
-        self.heads = heads
-        self.mask = mask
-
-        self.attention = MultiSelfAttention(embeddings, heads, mask)
-        self.norm1 = nn.LayerNorm(embeddings)
-        self.norm2 = nn.LayerNorm(embeddings)
-
-        self.ff = nn.Sequential(
-            nn.Linear(embeddings, ff_dimension),
-            nn.ReLU(),
-            nn.Linear(ff_dimension, embeddings)
-        )
-
-
-    def forward(self, x):
-        """
-        x is of shape (batch, seq, embedding)
-        """
-
-        # checking the embedding dimension
-        b, seq, emb = x.shape
-        assert self.embeddings == emb, f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
-
-        attended = self.attention(x)
-        x = self.norm1(attended + x)
-        feedforward = self.ff(x)
-        x = self.norm2(feedforward + x)
-
-        return x
 
 
 class Transformer(nn.Module):
@@ -151,9 +51,19 @@ class Transformer(nn.Module):
     - num_tokens (int): Number of distinct tokens in the input sequence.
     - output_size (tuple): Output size of the transformer, represented as (channels, height, width).
     """
-    def __init__(self, embeddings=256, heads=8, depth=6, seq_length=6*6*6, num_tokens=10, output_size=(3, 11, 11)):
+    def __init__(self, 
+                encoder="custom",
+                embeddings=256, 
+                heads=8, 
+                depth=6, 
+                seq_length=6*6*6, 
+                num_tokens=10, 
+                output_size=(3, 11, 11)
+            ):
 
         super().__init__()
+
+        assert encoder in ["builtin", "custom"]
 
         self.num_tokens = num_tokens
         self.embeddings = embeddings
@@ -161,12 +71,27 @@ class Transformer(nn.Module):
         self.token_emb = nn.Embedding(num_tokens, embeddings)
         self.pos_emb = PositionalEncoding2D(embeddings)
 
-        tblocks = []
-        for _ in range(depth):
-            tblocks.append(TransformerBlock(embeddings=embeddings, heads=heads))
-        self.tblocks = nn.Sequential(*tblocks)
+        if encoder == "custom":
+            tblocks = []
+            for _ in range(depth):
+                tblocks.append(TransformerBlock(embeddings=embeddings, heads=heads))
+            self.tblocks = nn.Sequential(*tblocks)
+            
+        elif encoder == "builtin":
+            tblocks = transformer_encoder_model(
+                            embeddings=embeddings, 
+                            heads=heads,
+                            depth=depth,
+                            batch_first=True
+                )
+            self.tblocks = tblocks
 
-        self.to_probs = nn.Linear(embeddings, torch.prod(torch.tensor(output_size)).item())
+        middle_layer = (seq_length*embeddings + embeddings) // 2
+        self.to_probs = nn.Sequential(
+                nn.Linear(seq_length*embeddings, middle_layer),
+                nn.Linear(middle_layer, embeddings),
+                nn.Linear(embeddings, torch.prod(torch.tensor(output_size)).item())
+        )
 
 
     def forward(self, x):
@@ -188,7 +113,8 @@ class Transformer(nn.Module):
         x = self.tblocks(x)
 
         # final output layer
-        x = x.mean(dim=1) # avg pool
+        # x = x.mean(dim=1) # avg pool
+        x = torch.flatten(x, start_dim=1)
         output = self.to_probs(x)
         # output = F.log_softmax(x, dim=1)
         # output = output.reshape((x.shape[0], *self.output_size))
@@ -197,8 +123,8 @@ class Transformer(nn.Module):
 
 if __name__ == '__main__':
     # testing
-    input_seq_length = (8, 6, 6, 6)
+    input_seq_length = (8, 24, 5)
     x = torch.randint(low=0, high=9, size=(input_seq_length))
 
-    model = Transformer()
+    model = Transformer(encoder="builtin", seq_length=24*5)
     print(model(x))

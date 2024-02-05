@@ -18,9 +18,11 @@ pip install numpy polars tqdm pyyaml ray torch positional-encodings[pytorch] lig
 
 - **Tranformer Model**: `transformer_model.model.py`
     - This file contains implementations of various components for building Transformer models.
-    - `MultiSelfAttention` is a module that implements multi-head self-attention for Transformer models.
-    - `TransformerBlock` is a module representing a single block within the Transformer architecture.
     - `Transformer` is the main model for sequence-to-classif tasks using the Transformer architecture.
+    - Encoders**:
+            - `transformer_encoder_model`: builtin transformer encoder from pytorch
+            - `MultiSelfAttention` is a module that implements multi-head self-attention for Transformer models.
+            - `TransformerBlock` is a module representing a single block within the Transformer architecture. 
 
 - **Lightning Transformer**: `lightning_module.py`
     - The `LightningTransformer` class inherits from `pytorch_lightning.LightningModule` and is designed for binary classification tasks using Transformer models. The model is trained using BCEWithLogitsLoss with optional class weighting.

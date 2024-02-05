@@ -10,7 +10,10 @@ class LightningTransformer(L.LightningModule):
     def __init__(self):
         super().__init__()
         
-        self.model = Transformer(seq_length=24)
+        self.model = Transformer(
+            encoder="builtin",
+            seq_length=24*5,
+            )
         # https://neptune.ai/blog/pytorch-loss-functions
         pos_weights = torch.tensor(200)
         self.loss = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
