@@ -62,7 +62,7 @@ if __name__ == "__main__":
         heads=data["ATTN_HEADS"],
         depth=data["DEPTH"],
         seq_length=data["SEQUENCE_LENGTH"],
-        num_token=data["NUM_TOKEN"],
+        num_tokens=data["NUM_TOKENS"],
         output_size=data["OUTPUT_SIZE"],
     ).to(DEVICE)
 
