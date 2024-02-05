@@ -22,6 +22,16 @@ df = pl.read_csv(datafile)
 
 
 class QuantumSyndromeDataset(Dataset):
+    """
+    QuantumSyndromeDataset is a PyTorch Dataset for loading quantum syndrome data from a CSV file.
+
+    Args:
+        - datafile (str): Path to the CSV file containing quantum syndrome data.
+        - transform (callable, optional): A function/transform to apply to the loaded data.
+
+    Example:
+        >>> dataset = QuantumSyndromeDataset(datafile="path/to/data.csv")
+    """
     def __init__(self, datafile=datafile, transform=None):
         
         self.datafile = datafile
@@ -118,20 +128,6 @@ class QuantumSyndromeDataset(Dataset):
             err_map[basis] = qubit_map
 
         return err_map
-
-
-# def prepare_tensor():
-#     for i in range(len(df)):
-        
-#         input_tensor = prepare_input_tensor(i)
-#         output_tensor = prepare_output_tensor(i)
-        
-#         print(f"Input Tensor: {input_tensor.shape}")
-        
-#         for errK, errV in output_tensor.items():
-#             print(f"Output Tensor {errK}: {errV.shape}")
-            
-#         return
 
 
 if __name__ == "__main__":

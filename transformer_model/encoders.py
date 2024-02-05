@@ -1,25 +1,60 @@
+"""
+# class MultiSelfAttention(nn.Module)
+    Multi-Head Self Attention module for transformer models.
+    Args:
+    - embeddings (int): Dimensionality of the token embeddings.
+    - heads (int): Number of attention heads.
+    - mask (bool): Whether to apply masking in self-attention.
+
+# class TransformerBlock(nn.Module)
+    Transformer Block module for building transformer models.
+    Args:
+    - embeddings (int): Dimensionality of the token embeddings.
+    - heads (int): Number of attention heads in the multi-head self-attention layer.
+    - ff_dimension (int): Dimensionality of the feed-forward layer.
+    - mask (bool): Whether to apply masking in the multi-head self-attention layer.
+"""
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
 
 def transformer_encoder_model(
-        embeddings=256,
-        heads=8,
-        dim_feedforward=512,
-        batch_first=True,
-        depth=6
-    ):
+    embeddings=256, heads=8, dim_feedforward=512, batch_first=True, depth=6
+):
+    """
+    Generate a Transformer Encoder model with specified configurations.
+
+    Args:
+        - embeddings (int, optional): Dimensionality of the token embeddings. Default is 256.
+        - heads (int, optional): Number of attention heads in the multi-head attention layers. Default is 8.
+        - dim_feedforward (int, optional): Dimensionality of the feed-forward layer. Default is 512.
+        - batch_first (bool, optional): If True, input and output tensors are provided as (batch, seq, features). Default is True.
+        - depth (int, optional): Number of transformer layers. Default is 6.
+
+    Returns:
+        nn.TransformerEncoder: Transformer Encoder model.
+
+    Example:
+        >>> model = transformer_encoder_model(
+        ...     embeddings=256,
+        ...     heads=8,
+        ...     dim_feedforward=512,
+        ...     batch_first=True,
+        ...     depth=6
+        ... )
+    """
     encoder_layer = nn.TransformerEncoderLayer(
-            d_model=embeddings,
-            nhead=heads,
-            dim_feedforward=dim_feedforward,
-            batch_first=batch_first
-        )
+        d_model=embeddings,
+        nhead=heads,
+        dim_feedforward=dim_feedforward,
+        batch_first=batch_first,
+    )
     transformer_enc = nn.TransformerEncoder(
         encoder_layer=encoder_layer,
         num_layers=depth,
-        )
+    )
     return transformer_enc
 
 
@@ -27,18 +62,19 @@ class MultiSelfAttention(nn.Module):
     def __init__(self, embeddings=256, heads=8, mask=False):
         super().__init__()
 
-        assert embeddings % heads == 0, f"Embeddings:{embeddings} and heads:{heads} doesn't fit the architecture."
+        assert (
+            embeddings % heads == 0
+        ), f"Embeddings:{embeddings} and heads:{heads} doesn't fit the architecture."
 
         self.embeddings = embeddings
         self.heads = heads
         self.mask = mask
-        
+
         self.tokey = nn.Linear(embeddings, embeddings, bias=False)
         self.toquery = nn.Linear(embeddings, embeddings, bias=False)
         self.tovalue = nn.Linear(embeddings, embeddings, bias=False)
 
         self.output_head = nn.Linear(embeddings, embeddings)
-
 
     def forward(self, x):
         """
@@ -47,8 +83,10 @@ class MultiSelfAttention(nn.Module):
 
         # checking the embedding dimension
         b, seq, emb = x.shape
-        assert self.embeddings == emb, f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
-        
+        assert (
+            self.embeddings == emb
+        ), f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
+
         keys = self.tokey(x)
         queries = self.toquery(x)
         values = self.tovalue(x)
@@ -70,7 +108,7 @@ class MultiSelfAttention(nn.Module):
         # self-attention, scaling, masking and normalization
         # the output shape is (b * heads, seq, seq)
         attn_weights = torch.bmm(queries, keys.transpose(1, 2))
-        attn_weights = attn_weights / (emb ** 0.5)
+        attn_weights = attn_weights / (emb**0.5)
         if self.mask:
             indices = torch.triu_indices(seq, seq, offset=1)
             attn_weights[:, indices[0], indices[2]] = float("-inf")
@@ -102,9 +140,8 @@ class TransformerBlock(nn.Module):
         self.ff = nn.Sequential(
             nn.Linear(embeddings, ff_dimension),
             nn.ReLU(),
-            nn.Linear(ff_dimension, embeddings)
+            nn.Linear(ff_dimension, embeddings),
         )
-
 
     def forward(self, x):
         """
@@ -113,7 +150,9 @@ class TransformerBlock(nn.Module):
 
         # checking the embedding dimension
         b, seq, emb = x.shape
-        assert self.embeddings == emb, f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
+        assert (
+            self.embeddings == emb
+        ), f"The embedding dimension doesn't match. Model:{self.embeddings}, Input:{emb}."
 
         attended = self.attention(x)
         x = self.norm1(attended + x)

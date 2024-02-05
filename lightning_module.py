@@ -7,17 +7,60 @@ import torch.nn.functional as F
 
 
 class LightningTransformer(L.LightningModule):
-    def __init__(self):
+    """
+    LightningTransformer is a PyTorch Lightning Module implementing a Transformer-based model
+    for sequence-to-sequence tasks in quantum syndrome classification.
+
+    Args:
+        - encoder (str): The type of encoder to use in the Transformer model.
+        - embeddings (int): Dimensionality of the token embeddings.
+        - heads (int): Number of attention heads in the multi-head attention layers.
+        - depth (int): Number of transformer layers.
+        - seq_len (int): Length of the input sequence.
+        - num_tokens (int): Number of distinct tokens in the input sequence.
+        - output_size (int): Output size of the transformer, eg. 363 (3, 11, 11)
+
+    Attributes:
+        - model (Transformer): The underlying Transformer model.
+        - loss (nn.BCEWithLogitsLoss): Binary Cross-Entropy loss with logits.
+        - optimizer (AdamW): AdamW with lr=1e-3 and weight decay=1e-4
+
+    Example:
+        >>> model = LightningTransformer(
+        ...     encoder="builtin",
+        ...     embeddings=256,
+        ...     heads=8,
+        ...     depth=6,
+        ...     seq_len=24,
+        ...     num_tokens=10,
+        ...     output_size=363
+        ... )
+    """
+
+    def __init__(
+        self, encoder, embeddings, heads, depth, seq_length, num_tokens, output_size
+    ):
         super().__init__()
-        
+
+        # defining the model
         self.model = Transformer(
-            encoder="builtin",
-            seq_length=24*5,
-            )
+            encoder=encoder,
+            embeddings=embeddings,
+            heads=heads,
+            depth=depth,
+            seq_length=seq_length,
+            num_tokens=num_tokens,
+            output_size=output_size,
+        )
+
+        # defining the loss function
         # https://neptune.ai/blog/pytorch-loss-functions
         pos_weights = torch.tensor(200)
         self.loss = nn.BCEWithLogitsLoss(pos_weight=pos_weights)
 
+        # defining the optimizer
+        self.optimizer = AdamW(self.model.parameters(), lr=1e-3, weight_decay=1e-4)
+        
 
     def shared_step(self, batch, batch_idx, mode="train"):
         # getting predictons
@@ -30,25 +73,20 @@ class LightningTransformer(L.LightningModule):
         w_acc, f1 = self.weighted_acc(y_pred, y)
 
         # logging metrics
-        self.log(f'{mode}_WAcc', w_acc, on_epoch=True, on_step=False)
-        self.log(f'{mode}_F1', f1, on_epoch=True, on_step=False)
-        self.log(f'{mode}_Loss', loss, on_epoch=True, on_step=False)
-        
+        self.log(f"{mode}_WAcc", w_acc, on_epoch=True, on_step=False)
+        self.log(f"{mode}_F1", f1, on_epoch=True, on_step=False)
+        self.log(f"{mode}_Loss", loss, on_epoch=True, on_step=False)
+
         return loss
 
-    
     def training_step(self, batch, batch_idx):
         return self.shared_step(batch, batch_idx, mode="train")
-
 
     def validation_step(self, batch, batch_idx):
         return self.shared_step(batch, batch_idx, mode="valid")
 
-
     def configure_optimizers(self):
-        optimizer = AdamW(self.model.parameters(), lr=1e-3, weight_decay=1e-4)
-        return optimizer
-
+        return self.optimizer
 
     def weighted_acc(self, y_pred, y_true, weights=[0.9, 0.1], thresh=0.5):
         """
@@ -56,7 +94,9 @@ class LightningTransformer(L.LightningModule):
         """
         tp, tn, fp, fn = self.conf_matrix(y_pred, y_true, thresh)
 
-        weighted_accuracy = (weights[0] * tp + weights[1] * tn) / (weights[0] * (tp + fn) + weights[1] * (tn + fp))
+        weighted_accuracy = (weights[0] * tp + weights[1] * tn) / (
+            weights[0] * (tp + fn) + weights[1] * (tn + fp)
+        )
         # Add epsilon to avoid division by zero
         precision = tp / (tp + fp + 1e-10)
         recall = tp / (tp + fn + 1e-10)
@@ -64,13 +104,12 @@ class LightningTransformer(L.LightningModule):
 
         return weighted_accuracy, f1
 
-        
     def conf_matrix(self, y_preds, y_true, thresh=0.5):
         preds = (y_preds > thresh).int()
-        tp = torch.sum((preds==1) & (y_true == 1))
-        tn = torch.sum((preds==0) & (y_true == 0))
-        fp = torch.sum((preds==1) & (y_true == 0))
-        fn = torch.sum((preds==0) & (y_true == 1))
+        tp = torch.sum((preds == 1) & (y_true == 1))
+        tn = torch.sum((preds == 0) & (y_true == 0))
+        fp = torch.sum((preds == 1) & (y_true == 0))
+        fn = torch.sum((preds == 0) & (y_true == 1))
         return tp.item(), tn.item(), fp.item(), fn.item()
 
 
@@ -92,13 +131,13 @@ def main():
     seed_everything(42, workers=True)
 
     # Load configuration from YAML file
-    with open("config.yaml", 'r') as file:
+    with open("config.yaml", "r") as file:
         data = yaml.safe_load(file)
 
     # Extract configuration parameters
-    DISTANCE = data['DISTANCE']
-    ENCODING_CHANNEL = data['ENCODING_CHANNEL']
-    DATASET_DIR = data['DATASET_DIR']
+    DISTANCE = data["DISTANCE"]
+    ENCODING_CHANNEL = data["ENCODING_CHANNEL"]
+    DATASET_DIR = data["DATASET_DIR"]
 
     # Read data from the last generated CSV file using polars
     index = len(os.listdir(DATASET_DIR))
@@ -128,6 +167,7 @@ def main():
     # loss = loss(x_hat, y)
     print(y_pred.shape, y.shape)
     # print(conf_matrix(y_pred, y))
+
 
 if __name__ == "__main__":
     main()

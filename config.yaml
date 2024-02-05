@@ -1,8 +1,23 @@
 # data
-DISTANCE: 5
-SHOTS: 2000
-DATASET_DIR: "datasets"
-ENCODING_CHANNEL: 6
+DISTANCE: 5         # code distance for QEC circuit
+SHOTS: 200_000      # Number of times the circuit is sampled
+DATASET_DIR: "datasets" # where the dataset is stored
+ENCODING_CHANNEL: 6 # NOT USED in this repo, according to paper the feature vector size for individual qubits.
+TRAIN_SPLIT: 0.5    # train split from all-dataset
+VALID_SPLIT: 0.25   # valid split from all-dataset
+TEST_SPLIT: 0.25    # test split from all-dataset
 
-# Training Device
-DEVICE: "cpu"
+# Training Parameters
+DEVICE: "cpu"       # one of ("cpu", "cuda", "mps")
+BATCH_SIZE: 32      # batch size
+MAX_EPOCHS: 100     # maximum allowed epochs
+MIN_EPOCHS: 10      # minimum allowed epochs
+
+# Model Parameters
+ENCODER: "builtin"  # one of ["builtin", "custom"]
+EMBEDDINGS: 256     # embedding dimension
+ATTN_HEADS: 8       # number of attention heads
+DEPTH: 6            # number of times the encoder layer is repeated in the transformer
+SEQUENCE_LENGTH: 120  # Input sequence length of the transformer (24*5)
+NUM_TOKENS: 10      # number of unique tokens in the input
+OUTPUT_SIZE: 363    # output size of the transformer (3*11*11)
