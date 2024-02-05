@@ -49,11 +49,12 @@ def prepare_input_tensor(df_index):
     # Add a channel of zeros
     zeros_channel = torch.zeros((*padded_tensor.shape[:-1], 1))
     padded_tensor = torch.cat([padded_tensor, zeros_channel], dim=-1)
+    z = padded_tensor
 
     # Add 3D positional encoding
-    p_enc_3d = PositionalEncoding3D(ENCODING_CHANNEL)
-    z = torch.zeros((*padded_tensor.shape, ENCODING_CHANNEL))
-    z[:, :, :, :, 0] += padded_tensor
+    # p_enc_3d = PositionalEncoding3D(ENCODING_CHANNEL)
+    # z = torch.zeros((*padded_tensor.shape, ENCODING_CHANNEL))
+    # z[:, :, :, :, 0] += padded_tensor
 
     # These details are taken from the paper. Make ENCODING_CHANNEL=4 for these features
     # ones_channel = torch.ones((*z.shape[:-1], 1))
