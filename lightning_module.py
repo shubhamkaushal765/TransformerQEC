@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.optim import AdamW
 import lightning as L
 from transformer_model.model import Transformer
-from torchmetrics.classification import BinaryAccuracy
 import torch.nn.functional as F
 
 

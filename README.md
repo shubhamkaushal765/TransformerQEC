@@ -5,7 +5,7 @@
 ## Requirements
 
 ```bash
-pip install numpy polars tqdm pyyaml ray torch positional-encodings[pytorch]
+pip install numpy polars tqdm pyyaml ray torch positional-encodings[pytorch] lightning
 ```
 
 ## Overview
@@ -21,6 +21,31 @@ pip install numpy polars tqdm pyyaml ray torch positional-encodings[pytorch]
     - `MultiSelfAttention` is a module that implements multi-head self-attention for Transformer models.
     - `TransformerBlock` is a module representing a single block within the Transformer architecture.
     - `Transformer` is the main model for sequence-to-classif tasks using the Transformer architecture.
+
+- **Lightning Transformer**: `lightning_module.py`
+    - The `LightningTransformer` class inherits from `pytorch_lightning.LightningModule` and is designed for binary classification tasks using Transformer models. The model is trained using BCEWithLogitsLoss with optional class weighting.
+    - **Weighted Accuracy and F1 Score**: The `weighted_acc` method calculates the Weighted Accuracy and F1 Score based on a confusion matrix. Adjust the `weights` parameter for class weighting and the `thresh` parameter for thresholding probabilities.
+
+- **Training**: `train.py`
+    1. **Configuration Loading**: Load configuration parameters from a YAML file (`config.yaml`) to set up data paths and model parameters.
+
+    2. **Data Loading**: Read data from the last generated CSV file using Polars and create a dataset using `QuantumSyndromeDataset`. Split the dataset into training, validation, and test sets using PyTorch `random_split`.
+
+    3. **DataLoaders**: Create PyTorch `DataLoader` instances (`train_dl`, `val_dl`, `test_dl`) for the training, validation, and test datasets.
+
+    4. **Model Definition**: Define the Quantum Syndrome Classification model using the `LightningTransformer` class.
+
+    5. **Training Setup**: Configure training settings, including callbacks such as `EarlyStopping` and loggers like `CSVLogger`.
+
+    6. **Training**: Train the model using the PyTorch Lightning Trainer (`trainer`). The training process includes monitoring validation loss, logging metrics, and early stopping.
+        ```bash
+        python train.py
+        ```
+    
+    7. **Checkpoints and Logs**: Monitor training progress through checkpoints saved in the `checkpoints/` directory and logs in the `logs/` directory.
+            
+
+    
 
 ## Configuration
 
@@ -47,3 +72,4 @@ This will generate synthetic data for quantum error correction experiments, incl
 
 - The number of parallel executions is set to half of the available CPU cores for efficiency.
 - The `get_n_shots` function generates and stores data for multiple shots of a quantum error correction circuit in parallel, leveraging Ray for parallelism.
+- **Weighted Accuracy and F1 Score**: The `weighted_acc` method calculates the Weighted Accuracy and F1 Score based on a confusion matrix. Adjust the `weights` parameter for class weighting and the `thresh` parameter for thresholding probabilities.
