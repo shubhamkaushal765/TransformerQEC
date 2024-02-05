@@ -69,7 +69,7 @@ class QuantumSyndromeDataset(Dataset):
         # Add a channel of zeros
         zeros_channel = torch.zeros((*padded_tensor.shape[:-1], 1))
         padded_tensor = torch.cat([padded_tensor, zeros_channel], dim=-1)
-        z = padded_tensor
+        z = padded_tensor.squeeze().to(int)
 
         # Add 3D positional encoding
         # p_enc_3d = PositionalEncoding3D(ENCODING_CHANNEL)
@@ -112,7 +112,8 @@ class QuantumSyndromeDataset(Dataset):
 
             # Initialize the Qubit map, and mark the erroneous qubits
             qubit_map = torch.zeros((2*DISTANCE+1, 2*DISTANCE+1))
-            qubit_map[bit_int[:, 0], bit_int[:, 1]] = 1
+            if bit_int.numel():
+                qubit_map[bit_int[:, 0], bit_int[:, 1]] = 1
             err_map[basis] = qubit_map
 
         return err_map
