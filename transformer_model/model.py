@@ -34,7 +34,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from positional_encodings.torch_encodings import PositionalEncoding3D
+from positional_encodings.torch_encodings import PositionalEncoding2D
 
 
 class MultiSelfAttention(nn.Module):
@@ -155,7 +155,7 @@ class Transformer(nn.Module):
         self.embeddings = embeddings
         self.output_size = output_size
         self.token_emb = nn.Embedding(num_tokens, embeddings)
-        self.pos_emb = PositionalEncoding3D(embeddings)
+        self.pos_emb = PositionalEncoding2D(embeddings)
 
         tblocks = []
         for _ in range(depth):
@@ -167,7 +167,7 @@ class Transformer(nn.Module):
 
     def forward(self, x):
         """
-        x (input tensor): (batch, x_coord, y_coord, round_coord)
+        x (input tensor): (batch, xy_coord, round_coord)
         output (output_tensor): (batch, flattened_output_size)
         """
 
@@ -185,8 +185,8 @@ class Transformer(nn.Module):
 
         # final output layer
         x = x.mean(dim=1) # avg pool
-        x = self.to_probs(x)
-        output = F.log_softmax(x, dim=1)
+        output = self.to_probs(x)
+        # output = F.log_softmax(x, dim=1)
         # output = output.reshape((x.shape[0], *self.output_size))
 
         return output
@@ -197,4 +197,4 @@ if __name__ == '__main__':
     x = torch.randint(low=0, high=9, size=(input_seq_length))
 
     model = Transformer()
-    print(model(x).shape)
+    print(model(x))

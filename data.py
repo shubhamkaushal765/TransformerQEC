@@ -62,14 +62,14 @@ class QuantumSyndromeDataset(Dataset):
         reshaped_tensor = arr.view(1, arr.shape[-1]//DISTANCE, DISTANCE)
         
         # Pad the tensor to (1, 36, 5)
-        pad_length = int((DISTANCE+1)**2 - arr.shape[-1]//DISTANCE)
-        padded_tensor = torch.nn.functional.pad(reshaped_tensor, (0, 0, 0, pad_length, 0, 0), value=0)
-        padded_tensor = padded_tensor.view(1, (DISTANCE+1), (DISTANCE+1), DISTANCE)
+        # pad_length = int((DISTANCE+1)**2 - arr.shape[-1]//DISTANCE)
+        # padded_tensor = torch.nn.functional.pad(reshaped_tensor, (0, 0, 0, pad_length, 0, 0), value=0)
+        # padded_tensor = padded_tensor.view(1, (DISTANCE+1), (DISTANCE+1), DISTANCE)
 
         # Add a channel of zeros
-        zeros_channel = torch.zeros((*padded_tensor.shape[:-1], 1))
-        padded_tensor = torch.cat([padded_tensor, zeros_channel], dim=-1)
-        z = padded_tensor.squeeze().to(int)
+        # zeros_channel = torch.zeros((*padded_tensor.shape[:-1], 1))
+        # padded_tensor = torch.cat([padded_tensor, zeros_channel], dim=-1)
+        z = reshaped_tensor.squeeze().to(int)
 
         # Add 3D positional encoding
         # p_enc_3d = PositionalEncoding3D(ENCODING_CHANNEL)
