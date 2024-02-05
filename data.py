@@ -13,6 +13,7 @@ with open("config.yaml", 'r') as file:
 DISTANCE = data['DISTANCE']
 ENCODING_CHANNEL = data['ENCODING_CHANNEL']
 DATASET_DIR = data['DATASET_DIR']
+DEVICE = data['DEVICE']
 
 # Read data from the last generated CSV file using polars
 index = len(os.listdir(DATASET_DIR))
@@ -36,7 +37,7 @@ class QuantumSyndromeDataset(Dataset):
         outputs = self.prepare_output_tensor(index)
         outputs = torch.stack((outputs['X'], outputs['Y'], outputs['Z']))
         outputs = outputs.reshape(-1)
-        return inputs, outputs
+        return inputs.to(DEVICE), outputs.to(DEVICE)
 
 
     def prepare_input_tensor(self, df_index):

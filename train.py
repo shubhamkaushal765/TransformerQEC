@@ -19,6 +19,7 @@ with open("config.yaml", 'r') as file:
 DISTANCE = data['DISTANCE']
 ENCODING_CHANNEL = data['ENCODING_CHANNEL']
 DATASET_DIR = data['DATASET_DIR']
+DEVICE = data['DEVICE']
 
 # Read data from the last generated CSV file using polars
 index = len(os.listdir(DATASET_DIR))
@@ -40,10 +41,10 @@ test_dl = DataLoader(test_ds, batch_size=32, shuffle=True)
 early_stopping = EarlyStopping(monitor="val_loss", mode="min", patience=5)
 
 # loggers
-logger = CSVLogger(save_dir="logs", name="TransformerQEC", flush_logs_every_n_steps=1)
+logger = CSVLogger(save_dir="logs", name="TransformerQEC", flush_logs_every_n_steps=100)
 
 # train model
-model = LightningTransformer()
+model = LightningTransformer().to(DEVICE)
 trainer = L.Trainer(
     default_root_dir="checkpoints/", 
     logger=logger, 

@@ -30,11 +30,15 @@ https://peterbloem.nl/blog/transformers
 https://pypi.org/project/positional-encodings/
 '''
 
-import torch
+import torch, yaml
 import torch.nn as nn
 import torch.nn.functional as F
 
 from positional_encodings.torch_encodings import PositionalEncoding2D
+
+with open("config.yaml", 'r') as file:
+    data = yaml.safe_load(file)
+DEVICE = data['DEVICE']
 
 
 class MultiSelfAttention(nn.Module):
@@ -177,7 +181,7 @@ class Transformer(nn.Module):
         tokens = self.token_emb(for_tokens)
         # b, seq, k = tokens.shape
         temp_pos = torch.zeros(position_shape)
-        positions = self.pos_emb(temp_pos).reshape(x.shape[0], -1, self.embeddings)
+        positions = self.pos_emb(temp_pos.to(DEVICE)).reshape(x.shape[0], -1, self.embeddings).to(DEVICE)
         x = tokens + positions
 
         # transformer blocks
