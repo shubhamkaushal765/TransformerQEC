@@ -3,7 +3,7 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Generic badge](https://img.shields.io/badge/QuantumComputing-QEC-<COLOR>.svg)](https://shields.io/)
 
-> Implementation of [Transformer-QEC: Quantum Error Correction Code Decoding with Transferable Transformers](https://arxiv.org/abs/2311.16082)
+> An unofficial implementation of [Transformer-QEC: Quantum Error Correction Code Decoding with Transferable Transformers](https://arxiv.org/abs/2311.16082)
 
 ## Install Requirements
 
@@ -49,6 +49,13 @@ pip install -r requirements.txt
     
     7. **Checkpoints and Logs**: Monitor training progress through checkpoints saved in the `checkpoints/` directory and logs in the `logs/` directory.
             
+- **Validation**: `valid.py`.
+    1. Put the checkpoint path in the `config.yaml` with label "CHECKPOINT".
+    2. Assuming all other parameters are same as that used in training. If not, change it accordingly.
+    3. run
+        ```bash
+        python valid.py
+        ```
 
 ## Usage
 

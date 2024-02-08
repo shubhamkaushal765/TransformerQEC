@@ -3,7 +3,6 @@ from torch.utils.data import DataLoader, random_split
 
 import lightning as L
 from lightning.pytorch import seed_everything
-from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import CSVLogger
 
 from data import QuantumSyndromeDataset
@@ -17,11 +16,9 @@ with open("config.yaml", "r") as file:
 # To get reproducibility
 seed = data["SEED"]
 if seed:
-    seed_everything(42, workers=True)
+    seed_everything(seed, workers=True)
 
 # Extract configuration parameters
-DISTANCE = data["DISTANCE"]
-ENCODING_CHANNEL = data["ENCODING_CHANNEL"]
 DATASET_DIR = data["DATASET_DIR"]
 DEVICE = data["DEVICE"]
 BATCH_SIZE = data["BATCH_SIZE"]
@@ -42,14 +39,6 @@ val_dl = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=True)
 test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=True)
 ################################################################
 
-
-# LIGHTNING CODE
-# callbacks
-early_stopping = EarlyStopping(monitor="valid_Loss", mode="min", patience=3)
-model_checkpoint = ModelCheckpoint(
-    dirpath="chcekpoints", monitor="valid_Loss", mode="min", save_top_k=3
-)
-
 # loggers
 logger = CSVLogger(save_dir="logs", name="TransformerQEC", flush_logs_every_n_steps=100)
 ################################################################
@@ -58,7 +47,8 @@ logger = CSVLogger(save_dir="logs", name="TransformerQEC", flush_logs_every_n_st
 if __name__ == "__main__":
 
     # Transformer model
-    model = LightningTransformer(
+    model = LightningTransformer.load_from_checkpoint(
+        data["CHECKPOINT"],
         encoder=data["ENCODER"],
         embeddings=data["EMBEDDINGS"],
         heads=data["ATTN_HEADS"],
@@ -66,15 +56,12 @@ if __name__ == "__main__":
         seq_length=data["SEQUENCE_LENGTH"],
         num_tokens=data["NUM_TOKENS"],
         output_size=data["OUTPUT_SIZE"],
-    ).to(DEVICE)
+        thresh=data["THRESH"],
+    ).to(data["DEVICE"])
 
-    # Lightning training
+    # Lightning validation
     trainer = L.Trainer(
-        default_root_dir="checkpoints/",
         logger=logger,
-        check_val_every_n_epoch=1,
-        max_epochs=data["MAX_EPOCHS"],
-        min_epochs=data["MIN_EPOCHS"],
-        callbacks=[early_stopping, model_checkpoint],
     )
-    trainer.fit(model=model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+
+    trainer.validate(model, val_dl, verbose=True)

@@ -75,8 +75,8 @@ class Transformer(nn.Module):
         # final output layers
         middle_layer = (seq_length * embeddings + embeddings) // 2
         self.to_probs = nn.Sequential(
-            nn.Linear(seq_length * embeddings, middle_layer),
-            nn.Linear(middle_layer, embeddings),
+            # nn.Linear(seq_length * embeddings, middle_layer),
+            # nn.Linear(middle_layer, embeddings),
             nn.Linear(embeddings, output_size),
         )
 
@@ -102,7 +102,7 @@ class Transformer(nn.Module):
         x = self.tblocks(x)
 
         # final output layer
-        # x = x.mean(dim=1) # avg pool
+        x = x.mean(dim=1) # avg pool
         x = torch.flatten(x, start_dim=1)
         output = self.to_probs(x)
 

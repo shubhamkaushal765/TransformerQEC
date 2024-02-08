@@ -8,6 +8,7 @@ VALID_SPLIT: 0.25   # valid split from all-dataset
 TEST_SPLIT: 0.25    # test split from all-dataset
 
 # Training Parameters
+SEED: 42            # To have reproducible results, False for random data-splits/training
 DEVICE: "cpu"       # one of ("cpu", "cuda", "mps")
 BATCH_SIZE: 32      # batch size
 MAX_EPOCHS: 100     # maximum allowed epochs
@@ -21,3 +22,7 @@ DEPTH: 6            # number of times the encoder layer is repeated in the trans
 SEQUENCE_LENGTH: 120  # Input sequence length of the transformer (24*5)
 NUM_TOKENS: 10      # number of unique tokens in the input
 OUTPUT_SIZE: 363    # output size of the transformer (3*11*11)
+
+# Model Validation Parameters
+CHECKPOINT: "logs/TransformerQEC/version_20/chcekpoints_avgpool/epoch=6-step=21875.ckpt"
+THRESH: 0.5         # Threshold for output prediction
