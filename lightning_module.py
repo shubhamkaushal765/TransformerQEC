@@ -38,7 +38,15 @@ class LightningTransformer(L.LightningModule):
     """
 
     def __init__(
-        self, encoder, embeddings, heads, depth, seq_length, num_tokens, output_size
+        self,
+        encoder,
+        embeddings,
+        heads,
+        depth,
+        seq_length,
+        num_tokens,
+        output_size,
+        thresh=0.5,
     ):
         super().__init__()
 
@@ -53,6 +61,9 @@ class LightningTransformer(L.LightningModule):
             output_size=output_size,
         )
 
+        # save hyperparameters
+        self.save_hyperparameters()
+        
         # defining the loss function
         # https://neptune.ai/blog/pytorch-loss-functions
         pos_weights = torch.tensor(200)
@@ -60,7 +71,9 @@ class LightningTransformer(L.LightningModule):
 
         # defining the optimizer
         self.optimizer = AdamW(self.model.parameters(), lr=1e-3, weight_decay=1e-4)
-        
+
+        # threshold for final prediction
+        self.thresh = thresh
 
     def shared_step(self, batch, batch_idx, mode="train"):
         # getting predictons
@@ -70,12 +83,17 @@ class LightningTransformer(L.LightningModule):
 
         # calculating metrics
         y_pred = F.sigmoid(x_hat)
-        w_acc, f1 = self.weighted_acc(y_pred, y)
+        tp, tn, fp, fn = self.conf_matrix(y_pred, y, thresh=self.thresh)
+        w_acc, f1 = self.weighted_acc(y_pred, y, thresh=self.thresh)
 
         # logging metrics
         self.log(f"{mode}_WAcc", w_acc, on_epoch=True, on_step=False)
         self.log(f"{mode}_F1", f1, on_epoch=True, on_step=False)
         self.log(f"{mode}_Loss", loss, on_epoch=True, on_step=False)
+        self.log(f"{mode}_tp", tp, on_epoch=True, on_step=True)
+        self.log(f"{mode}_tn", tn, on_epoch=True, on_step=True)
+        self.log(f"{mode}_fp", fp, on_epoch=True, on_step=True)
+        self.log(f"{mode}_fn", fn, on_epoch=True, on_step=True)
 
         return loss
 
