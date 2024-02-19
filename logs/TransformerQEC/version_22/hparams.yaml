@@ -1,0 +1,8 @@
+depth: 6
+embeddings: 256
+encoder: builtin
+heads: 8
+num_tokens: 10
+output_size: 363
+seq_length: 120
+thresh: 0.5

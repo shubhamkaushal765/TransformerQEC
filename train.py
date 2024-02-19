@@ -47,7 +47,7 @@ test_dl = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=True)
 # callbacks
 early_stopping = EarlyStopping(monitor="valid_Loss", mode="min", patience=3)
 model_checkpoint = ModelCheckpoint(
-    dirpath="chcekpoints", monitor="valid_Loss", mode="min", save_top_k=3
+    dirpath="checkpoints", monitor="valid_Loss", mode="min", save_top_k=3
 )
 
 # loggers

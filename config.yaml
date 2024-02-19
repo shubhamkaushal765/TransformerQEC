@@ -24,5 +24,5 @@ NUM_TOKENS: 10      # number of unique tokens in the input
 OUTPUT_SIZE: 363    # output size of the transformer (3*11*11)
 
 # Model Validation Parameters
-CHECKPOINT: "logs/TransformerQEC/version_20/chcekpoints_avgpool/epoch=6-step=21875.ckpt"
-THRESH: 0.5         # Threshold for output prediction
+CHECKPOINT: "logs/TransformerQEC/version_20/checkpoints_avgpool/epoch=6-step=21875.ckpt"
+THRESH: 0.5        # Threshold for output prediction
