@@ -4,7 +4,6 @@ from tqdm import tqdm
 import pandas as pd
 
 
-@ray.remote
 class SurfaceCode:
     def __init__(self, distance=5, rounds=5) -> None:
         """
@@ -194,6 +193,12 @@ class SurfaceCode:
         return {"syndrome": global_round_sym, "error": global_errs}
 
 
+@ray.remote
+class ParallelSurfaceCode(SurfaceCode):
+    def __init__(self):
+        pass
+
+
 if __name__ == "__main__":
 
     DISTANCE = 5
@@ -222,7 +227,9 @@ if __name__ == "__main__":
         with tqdm(total=ITERS) as pbar:
             for j in range(0, ITERS, INTVL):
 
-                actors = [SurfaceCode.remote(DISTANCE, ROUNDS) for _ in range(INTVL)]
+                actors = [
+                    ParallelSurfaceCode.remote(DISTANCE, ROUNDS) for _ in range(INTVL)
+                ]
                 results = ray.get([act.get_syndrome.remote() for act in actors])
                 for res in results:
                     syn = res["syndrome"]
