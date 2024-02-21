@@ -1,5 +1,5 @@
-from data_generation.stim_experiments import get_dets_and_errs, get_circuit
-from data_generation.data_utils import encode_hex, decode_hex
+from stim_experiments import get_dets_and_errs, get_circuit
+from data_utils import encode_hex, decode_hex
 import numpy as np
 import polars as pl
 from tqdm import tqdm
