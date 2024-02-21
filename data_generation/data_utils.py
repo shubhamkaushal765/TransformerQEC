@@ -1,3 +1,7 @@
+from glob import glob
+import pandas as pd
+
+
 def encode_hex(bits, distance=None, type="bits"):
     """
     Encode a sequence of binary bits into a hexadecimal string.
@@ -15,9 +19,12 @@ def encode_hex(bits, distance=None, type="bits"):
 
     # If inputs are bits, convert them to list of ints
     if type == "bits":
-        bit_int = [bit_int[i*distance:(i+1)*distance] for i in range(len(bit_int)//distance)]
+        bit_int = [
+            bit_int[i * distance : (i + 1) * distance]
+            for i in range(len(bit_int) // distance)
+        ]
         bit_int = map(lambda x: int(x, 2), bit_int)
-        
+
     bit_hex = map(lambda x: hex(x)[1:], bit_int)
     result = "".join(bit_hex)
     return result
@@ -45,3 +52,17 @@ def decode_hex(hex_bits, distance, sep=""):
     bit_bit = list(map(lambda x: format(x, f"0{distance}b"), bit_int))
     bit_bit = sep.join(bit_bit)
     return bit_bit
+
+
+def merge_csvs():
+    csvs = glob("datasets/custom_data_*.csv")
+    df = pd.read_csv(csvs[0])
+    for i in range(1, len(csvs)):
+        temp_df = pd.read_csv(csvs[i])
+        df = pd.concat([df, temp_df])
+
+    df.to_csv("datasets/final_custom_data_0.csv")
+
+
+if __name__ == "__main__":
+    merge_csvs()

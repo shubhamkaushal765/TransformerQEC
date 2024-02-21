@@ -129,7 +129,7 @@ env.bak/
 venv.bak/
 tqec/
 logs/TransformerQEC/*/checkpoints*/
-
+datasets/
 # Spyder project settings
 .spyderproject
 .spyproject

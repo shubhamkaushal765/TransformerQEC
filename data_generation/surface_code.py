@@ -1,7 +1,10 @@
 import numpy as np
-import ray
+import ray, os
+from tqdm import tqdm
+import pandas as pd
 
 
+@ray.remote
 class SurfaceCode:
     def __init__(self, distance=5, rounds=5) -> None:
         """
@@ -188,19 +191,67 @@ class SurfaceCode:
         for _type in sym_types:
             global_round_sym[_type][rounds] = prev_round_sym[_type].copy()
 
-        return global_round_sym, global_errs
+        return {"syndrome": global_round_sym, "error": global_errs}
 
 
 if __name__ == "__main__":
-    code = SurfaceCode()
-    _type = "phase"
-    syndromes, errors = code.get_syndrome()
-    print(syndromes[_type][1])
-    print(errors[_type][0])
-    columns = [
-        "distance",
-        "data_errors",
-        "phase_errors",
-        "data_syndrome",
-        "phase_syndrome",
+
+    DISTANCE = 5
+    ROUNDS = 5
+    ITERS = 1000
+    INTVL = 20
+    TARGET = os.path.join("./", "datasets")
+    COLS = [
+        "Distance",
+        "Rounds",
+        "dataSyndrome",
+        "phaseSyndrome",
+        "dataError",
+        "phaseError",
     ]
+
+    cpu_count = 5
+    print(f"CPUs: {cpu_count}")
+    ray.init(num_cpus=cpu_count)
+
+    for i in tqdm(range(ITERS)):
+
+        out_file = os.path.join(TARGET, f"custom_data_{i+6}.csv")
+        res_1k = []
+
+        with tqdm(total=ITERS) as pbar:
+            for j in range(0, ITERS, INTVL):
+
+                actors = [SurfaceCode.remote(DISTANCE, ROUNDS) for _ in range(INTVL)]
+                results = ray.get([act.get_syndrome.remote() for act in actors])
+                for res in results:
+                    syn = res["syndrome"]
+                    err = res["error"]
+
+                    data_syn = syn["data"].flatten().tolist()
+                    phase_syn = syn["phase"].flatten().tolist()
+                    data_err = err["data"].flatten().tolist()
+                    phase_err = err["phase"].flatten().tolist()
+
+                    data_syn = "".join(map(str, data_syn))
+                    phase_syn = "".join(map(str, phase_syn))
+                    data_err = "".join(map(str, data_err))
+                    phase_err = "".join(map(str, phase_err))
+
+                    res_1k.append(
+                        [DISTANCE, ROUNDS, data_syn, phase_syn, data_err, phase_err]
+                    )
+
+                pbar.update(INTVL)
+
+        df = pd.DataFrame(data=res_1k, columns=COLS)
+        df.to_csv(out_file)
+    ray.shutdown()
+
+    exit()
+    # code = SurfaceCode()
+    # _type = "phase"
+    # result = code.get_syndrome()
+    # syn = result["syndrome"]
+    # phase_syn = syn["phase"].flatten().tolist()
+    # print("".join(map(str, phase_syn)))
