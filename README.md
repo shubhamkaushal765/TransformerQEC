@@ -37,7 +37,7 @@ code.plot_surface_code()
 
 |                         MinimalSurfaceCode                         |                              SurfaceCode                              |                        SurfaceCode with errors                        |
 | :----------------------------------------------------------------: | :-------------------------------------------------------------------: | :-------------------------------------------------------------------: |
-| <img src="data_generation/images/image0.jpg" width=200 height=200> | <img src="data_generation/images/sc_image0.jpg" width=200 height=200> | <img src="data_generation/images/sc_image3.jpg" width=200 height=200> |
+| <img src="data_generation/images/image0.jpg" width=300 height=300> | <img src="data_generation/images/sc_image0.jpg" width=300 height=300> | <img src="data_generation/images/sc_image3.jpg" width=300 height=300> |
 
 Both classes provide methods to generate error patterns, calculate syndromes, and visualize the surface code layout.
 
