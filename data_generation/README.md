@@ -4,6 +4,10 @@
 
 > A Python class for simulating and visualizing simplified surface codes in quantum error correction.
 
+|                    Surface Code                    |              With Errors (example 1)               |              With Errors (example 2)               |
+| :------------------------------------------------: | :------------------------------------------------: | :------------------------------------------------: |
+| <img src="images/image0.jpg" width=200 height=200> | <img src="images/image1.jpg" width=200 height=200> | <img src="images/image2.jpg" width=200 height=200> |
+
 #### Features
 
 - Generate surface codes with custom distances
@@ -16,7 +20,7 @@
 ```python
 from minimal_surface_code import MinimalSurfaceCode
 
-code = MinimalSurfaceCode(distance=5)
+code = MinimalSurfaceCode(distance=5, min_q_err=2, prob_err=0.05)
 code.plot_surface_code()
 ```
 
@@ -33,41 +37,36 @@ Customize error generation by modifying `min_q_err`, `prob_err` parameters in __
 
 ### class `SurfaceCode`
 
-Implements a simulation of a surface code, a type of quantum error correction code. It generates datasets of surface code syndromes and errors for various parameters.
+> Extends MinimalSurfaceCode to simulate both X and Z errors in surface code quantum error correction.
+> `round` parameter not used.
+
+|                     Surface Code                      |                   With data errors                    |                   With phase errors                   |                   With both errors                    |
+| :---------------------------------------------------: | :---------------------------------------------------: | :---------------------------------------------------: | :---------------------------------------------------: |
+| <img src="images/sc_image0.jpg" width=200 height=200> | <img src="images/sc_image1.jpg" width=200 height=200> | <img src="images/sc_image2.jpg" width=200 height=200> | <img src="images/sc_image3.jpg" width=200 height=200> |
+
+
+#### Quick Start
+```python
+from  surface_code import SurfaceCode
+
+code = SurfaceCode(distance=5, rounds=5, min_q_err=2, prob_err=0.05)
+code.plot_surface_code()
+```
 
 #### Features
 
-- Simulate surface code with customizable distance and rounds
-- Generate X and Z errors on qubits
-- Collect syndrome measurements and error data
-- Parallel processing using Ray for improved performance
-- Save results to CSV files for further analysis
+- Simulates data (X) and phase (Z) errors
+- Calculates separate syndromes for both error types
+- Visualizes complete surface code layout
 
-#### Usage
+#### Visualization Key
 
-1. Set the parameters:
-   - `DISTANCE`: The distance of the surface code
-   - `ROUNDS`: The number of error propagation rounds
-   - `ITERS`: The number of iterations for data generation
-   - `INTVL`: The interval for progress updates
-   - `TARGET`: The directory where output files will be saved
-
-1. Run the script:
-   ```
-   python surface_code.py
-   ```
-
-2. The script will generate CSV files in the specified target directory, containing the simulation results.
-
-#### Output Format
-
-The generated CSV files contain the following columns:
-- Distance: The distance of the surface code
-- Rounds: The number of error propagation rounds
-- dataSyndrome: Flattened string representation of data syndromes
-- phaseSyndrome: Flattened string representation of phase syndromes
-- dataError: Flattened string representation of data errors
-- phaseError: Flattened string representation of phase errors
+- Gray circles: Data qubits
+- Green dots: Data syndrome qubits
+- Blue dots: Phase syndrome qubits
+- Green left-filled circles: Data errors
+- Blue right-filled circles: Phase errors
+- Colored dots: Non-zero syndrome measurements
 
 ## Contributing
 
