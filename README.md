@@ -11,6 +11,41 @@
 pip install -r requirements.txt
 ```
 
+## Surface Code Simulation
+
+> More details [here](data_generation/README.md) | code: [data_generation/surface_code.py](data_generation/surface_code.py)
+
+This project provides two classes for simulating surface codes in quantum error correction:
+
+### MinimalSurfaceCode
+
+Simulates X errors in a surface code.
+
+```python
+code = MinimalSurfaceCode(distance=5)
+code.plot_surface_code()
+```
+
+### SurfaceCode
+
+Extends MinimalSurfaceCode to simulate both X and Z errors.
+
+```python
+code = SurfaceCode(distance=5, min_q_err=2, prob_err=0.05)
+code.plot_surface_code()
+```
+
+|                         MinimalSurfaceCode                         |                              SurfaceCode                              |                        SurfaceCode with errors                        |
+| :----------------------------------------------------------------: | :-------------------------------------------------------------------: | :-------------------------------------------------------------------: |
+| <img src="data_generation/images/image0.jpg" width=200 height=200> | <img src="data_generation/images/sc_image0.jpg" width=200 height=200> | <img src="data_generation/images/sc_image3.jpg" width=200 height=200> |
+
+Both classes provide methods to generate error patterns, calculate syndromes, and visualize the surface code layout.
+
+#### Key Features
+- Customizable code distance and error probabilities
+- Syndrome calculation
+- Visualization of qubits, errors, and syndrome measurements
+
 ## Overview
 
  - **Quantum Data Generation**: The Python script (`data_gen.py`) generates synthetic data for quantum error correction experiments. It leverages the stim_experiments module for quantum circuit simulation and various utility functions for encoding, decoding, and data processing. Uses `DISTANCE` and `SHOTS` from config.
