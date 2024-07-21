@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\autoencoder\nn.py", line 65, in <module>
+    det = model(syn).squeeze(1)
+          ^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\autoencoder\nn.py", line 29, in forward
+    x = self.model(x)
+        ^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\container.py", line 217, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\LENOVO\Documents\VSCodeProjects\TransformerQEC\tqec\Lib\site-packages\torch\nn\modules\linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 shapes cannot be multiplied (192x6 and 36x16)

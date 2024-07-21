@@ -1,0 +1,11 @@
+Epoch: 0	 Loss: 0.5449 valid_loss: 0.5142	p: 0.8372	r: 0.9150	f1: 0.8744
+Epoch: 5	 Loss: 0.3170 valid_loss: 0.2883	p: 0.9263	r: 0.9350	f1: 0.9272
+Epoch: 10	 Loss: 0.2652 valid_loss: 0.2358	p: 0.8944	r: 0.9050	f1: 0.8958
+Epoch: 15	 Loss: 0.2355 valid_loss: 0.2315	p: 0.9461	r: 0.9500	f1: 0.9469
+Epoch: 20	 Loss: 0.2321 valid_loss: 0.2575	p: 0.8913	r: 0.9000	f1: 0.8950
+Epoch: 25	 Loss: 0.2290 valid_loss: 0.2184	p: 0.9411	r: 0.9450	f1: 0.9414
+Epoch: 30	 Loss: 0.2300 valid_loss: 0.2309	p: 0.9464	r: 0.9450	f1: 0.9456
+Epoch: 35	 Loss: 0.2252 valid_loss: 0.2497	p: 0.9180	r: 0.9250	f1: 0.9202
+Epoch: 40	 Loss: 0.2198 valid_loss: 0.2297	p: 0.9804	r: 0.9800	f1: 0.9788
+Epoch: 45	 Loss: 0.2240 valid_loss: 0.2441	p: 0.9540	r: 0.9550	f1: 0.9544
+Epoch: 49	 Loss: 0.2179 valid_loss: 0.2335	p: 0.9189	r: 0.9250	f1: 0.9193
