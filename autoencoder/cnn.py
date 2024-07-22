@@ -60,14 +60,14 @@ class AutoEncoder(nn.Module):
             err.reshape(-1).detach().numpy(),
             det.reshape(-1).detach().numpy(),
             zero_division=0.0,
-            average="weighted",
+            # average="weighted",
         )
         return loss, metrics
 
 
 model = AutoEncoder()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(2.0))
+loss_fn = nn.MSELoss()
 
 if __name__ == "__main__":
 
@@ -85,10 +85,11 @@ if __name__ == "__main__":
             optimizer.step()
             losses.append(loss)
 
-        if epoch % 5 == 0 or epoch == EPOCHS-1:
+        if epoch % 5 == 0 or epoch == EPOCHS - 1:
             print(f"Epoch: {epoch}\t Loss: {torch.tensor(losses).mean():.4f} ", end="")
 
             loss, metrics = model.run_valid(valid_dl)
-            print(
-                f"valid_loss: {loss:0.4f}\tp: {metrics[0]:.4f}\tr: {metrics[1]:.4f}\tf1: {metrics[2]:.4f}"
-            )
+            # print(
+            #     f"valid_loss: {loss:0.4f}\tp: {metrics[0]:.4f}\tr: {metrics[1]:.4f}\tf1: {metrics[2]:.4f}"
+            # )
+            print(loss, metrics)
