@@ -114,3 +114,9 @@ class AutoEncoder(nn.Module):
 |     exp0.txt      |  mseloss, sigmoid   |
 |     exp1.txt      |  bceloss, sigmoid   |
 
+
+## atrous_cnn_nn.py
+
+| Experiment number |     Properties      |
+| :---------------: | :-----------------: |
+|     exp0.txt      | mseloss, no-sigmoid |
