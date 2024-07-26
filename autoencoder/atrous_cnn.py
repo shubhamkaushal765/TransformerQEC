@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from data import train_dl, valid_dl
-import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 
 import yaml

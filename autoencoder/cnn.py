@@ -1,12 +1,16 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from data import train_dl, valid_dl
-import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 
-LEARNING_RATE = 0.0001
-EPOCHS = 50
+import yaml
+from utils import dotdict
+
+config = yaml.safe_load(open("autoencoder/config.yml"))
+config = dotdict(config)
+model_params = dotdict(config.MODEL)
+LEARNING_RATE = model_params.LEARNING_RATE
+EPOCHS = model_params.EPOCHS
 
 
 class AutoEncoder(nn.Module):
@@ -60,9 +64,14 @@ class AutoEncoder(nn.Module):
             err.reshape(-1).detach().numpy(),
             det.reshape(-1).detach().numpy(),
             zero_division=0.0,
-            # average="weighted",
         )
-        return loss, metrics
+        avg_metrics = precision_recall_fscore_support(
+            err.reshape(-1).detach().numpy(),
+            det.reshape(-1).detach().numpy(),
+            zero_division=0.0,
+            average="weighted",
+        )
+        return loss, metrics, avg_metrics
 
 
 model = AutoEncoder()
@@ -86,10 +95,12 @@ if __name__ == "__main__":
             losses.append(loss)
 
         if epoch % 5 == 0 or epoch == EPOCHS - 1:
-            print(f"Epoch: {epoch}\t Loss: {torch.tensor(losses).mean():.4f} ", end="")
+            print(f"Epoch:{epoch:2d} Loss:{torch.tensor(losses).mean():.3f} ", end="")
 
-            loss, metrics = model.run_valid(valid_dl)
-            # print(
-            #     f"valid_loss: {loss:0.4f}\tp: {metrics[0]:.4f}\tr: {metrics[1]:.4f}\tf1: {metrics[2]:.4f}"
-            # )
-            print(loss, metrics)
+            loss, m, avg_m = model.run_valid(valid_dl)
+            print(
+                f"valid_loss:{loss:0.3f} p0:{m[0][0]:.3f} p1:{m[0][1]:.3f} p:{avg_m[0]:.3f}",
+                end=" ",
+            )
+            print(f"r0:{m[1][0]:.3f} r1:{m[1][1]:.3f} r:{avg_m[1]:.3f}", end=" ")
+            print(f"f1_0:{m[2][0]:.3f} f1_1:{m[2][1]:.3f} f1:{avg_m[2]:.3f}")

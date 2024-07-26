@@ -1,12 +1,16 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from data import train_dl, valid_dl
-import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 
-LEARNING_RATE = 0.0001
-EPOCHS = 50
+import yaml
+from utils import dotdict
+
+config = yaml.safe_load(open("autoencoder/config.yml"))
+config = dotdict(config)
+model_params = dotdict(config.MODEL)
+LEARNING_RATE = model_params.LEARNING_RATE
+EPOCHS = model_params.EPOCHS
 
 
 class AtrousLayer(nn.Module):
@@ -55,6 +59,7 @@ class AutoEncoder(nn.Module):
             nn.LeakyReLU(0.01),
             nn.Linear(output_length, output_length),
             nn.Unflatten(1, (1, self.distance, self.distance)),
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
@@ -90,7 +95,7 @@ class AutoEncoder(nn.Module):
 
 model = AutoEncoder()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-loss_fn = nn.MSELoss()
+loss_fn = nn.BCELoss()
 
 if __name__ == "__main__":
 
