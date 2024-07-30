@@ -9,13 +9,20 @@ from utils import dotdict
 config = yaml.safe_load(open("autoencoder/config.yml"))
 config = dotdict(config)
 model_params = dotdict(config.MODEL)
+data = dotdict(config.DATA)
+
 LEARNING_RATE = model_params.LEARNING_RATE
 EPOCHS = model_params.EPOCHS
+DISTANCE = data.DISTANCE
 
 
 class AutoEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, distance=7):
         super().__init__()
+        self.distance = distance
+
+        end_shape = self.distance + 5
+        enc_output = 64 * end_shape * end_shape
         self.encoder = nn.Sequential(
             nn.Conv2d(2, 32, stride=(1, 1), kernel_size=(2, 2), padding=1),
             nn.LeakyReLU(0.01),
@@ -25,12 +32,12 @@ class AutoEncoder(nn.Module):
             nn.LeakyReLU(0.01),
             nn.Conv2d(64, 64, stride=(1, 1), kernel_size=(2, 2), padding=1),
             nn.Flatten(),
-            nn.Linear(6400, 128),
+            nn.Linear(enc_output, 128),
             nn.Linear(128, 64),
         )
         self.decoder = nn.Sequential(
-            nn.Linear(64, 6400),
-            nn.Unflatten(1, [64, 10, 10]),
+            nn.Linear(64, enc_output),
+            nn.Unflatten(1, [64, end_shape, end_shape]),
             nn.ConvTranspose2d(64, 64, stride=(1, 1), kernel_size=(2, 2), padding=1),
             nn.LeakyReLU(0.01),
             nn.ConvTranspose2d(64, 64, stride=(1, 1), kernel_size=(2, 2), padding=1),
@@ -74,7 +81,7 @@ class AutoEncoder(nn.Module):
         return loss, metrics, avg_metrics
 
 
-model = AutoEncoder()
+model = AutoEncoder(distance=DISTANCE)
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 loss_fn = nn.MSELoss()
 
